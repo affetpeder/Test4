@@ -1,0 +1,41 @@
+name: Build NativeScript Android APK
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Repo'yu checkout et
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # 2️⃣ Node.js kur
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      # 3️⃣ NativeScript CLI kur
+      - name: Install NativeScript CLI
+        run: npm install -g nativescript
+
+      # 4️⃣ Proje bağımlılıklarını kur
+      - name: Install dependencies
+        run: npm install
+
+      # 5️⃣ Release APK üret
+      - name: Build Release APK
+        run: tns build android --release --key-store-path "./dummy.keystore" --key-store-password "123456" --key-store-alias "alias" --key-store-alias-password "123456"
+
+      # 6️⃣ Artifact olarak APK'yı yükle
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ns-apk
+          path: platforms/android/app/build/outputs/apk/release/*.apk
