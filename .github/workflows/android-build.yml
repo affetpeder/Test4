@@ -1,4 +1,4 @@
-name: Build NativeScript Android APK
+name: Build NativeScript Android Debug APK
 
 on:
   push:
@@ -38,13 +38,13 @@ jobs:
           cmdline-tools: latest
           accept-android-sdk-licenses: true
 
-      # 6️⃣ Build Release APK (debug fallback yok)
-      - name: Build Release APK
-        run: tns build android --release --key-store-path "./dummy.keystore" --key-store-password "123456" --key-store-alias "alias" --key-store-alias-password "123456"
+      # 6️⃣ Build Debug APK
+      - name: Build Debug APK
+        run: tns build android
 
-      # 7️⃣ Upload APK artifact
+      # 7️⃣ Upload debug APK as artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ns-apk
-          path: platforms/android/app/build/outputs/apk/release/*.apk
+          name: ns-apk-debug
+          path: platforms/android/app/build/outputs/apk/debug/*.apk
