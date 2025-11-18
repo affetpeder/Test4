@@ -1,50 +1,33 @@
-name: Build NativeScript Android Debug APK
+name: Build Android APK
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout
       - uses: actions/checkout@v3
 
-      # Node.js setup
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: 20
 
-      # NativeScript CLI
-      - name: Install NativeScript CLI
-        run: npm install -g nativescript
+      - run: npm install -g nativescript
+      - run: npm install
 
-      # Dependencies
-      - name: Install dependencies
-        run: npm install
-
-      # Android SDK (minimal setup for debug)
       - name: Setup Android SDK
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y openjdk-11-jdk wget unzip
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
-          mkdir -p $HOME/android-sdk/cmdline-tools
-          unzip cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
-          yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
-          $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-          echo "PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/cmdline-tools/bin:$PATH" >> $GITHUB_ENV
-
-      # Build Debug APK
-      - name: Build Debug APK
-        run: tns build android
-
-      # Upload artifact
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+        uses: android-actions/setup-android@v2
         with:
-          name: ns-apk-debug
-          path: platforms/android/app/build/outputs/apk/debug/*.apk
+          api-level: 33
+          target: android-33
+          build-tools: 33.0.2
+
+      - run: ns build android
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HelloWorld-APK
+          path: platforms/android/app/build/outputs/apk/debug/app-debug.apk
