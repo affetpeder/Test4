@@ -1,4 +1,4 @@
-name: Build NativeScript Android APK (Debug)
+name: Cloud Build NativeScript APK
 
 on:
   push:
@@ -11,25 +11,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "18"
 
+      # 3️⃣ Install NativeScript CLI
       - name: Install NativeScript CLI
         run: npm install -g nativescript
 
+      # 4️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
-      - name: Build Debug APK
-        run: tns build android
+      # 5️⃣ Cloud Build for Android
+      - name: Build APK via NativeScript Cloud
+        run: tns cloud build android --release
 
+      # 6️⃣ Upload artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: ns-apk
-          path: platforms/android/app/build/outputs/apk/debug/*.apk
+          path: platforms/android/app/build/outputs/apk/**/*.apk
