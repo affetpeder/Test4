@@ -3,8 +3,6 @@ name: Build NativeScript Android Debug APK
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
 
 jobs:
   build:
@@ -25,24 +23,30 @@ jobs:
       - name: Install NativeScript CLI
         run: npm install -g nativescript
 
-      # 4️⃣ Install dependencies
+      # 4️⃣ Install project dependencies
       - name: Install dependencies
         run: npm install
 
-      # 5️⃣ Setup Android SDK
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-        with:
-          api-level: 33
-          build-tools: 33.0.2
-          cmdline-tools: latest
-          accept-android-sdk-licenses: true
+      # 5️⃣ Install Android SDK manually
+      - name: Setup Android SDK manually
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openjdk-11-jdk unzip wget
+          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O cmdline-tools.zip
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          unzip cmdline-tools.zip -d $HOME/android-sdk/cmdline-tools
+          yes | $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/cmdline-tools/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+
+          # Set environment variables
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$HOME/android-sdk/platform-tools:$HOME/android-sdk/cmdline-tools/cmdline-tools/bin:$PATH" >> $GITHUB_ENV
 
       # 6️⃣ Build Debug APK
       - name: Build Debug APK
         run: tns build android
 
-      # 7️⃣ Upload debug APK as artifact
+      # 7️⃣ Upload artifact
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
